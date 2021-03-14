@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Random;
+import java.util.TimerTask;
 
 public class GameField extends JPanel implements ActionListener {
 
@@ -29,7 +30,8 @@ public class GameField extends JPanel implements ActionListener {
     private int[] x = new int[ALL_DOTS];
     private int[] y = new int[ALL_DOTS];
     private int[] leftupx = new int[ALL_DOTS], leftupy = new int[ALL_DOTS];
-    private int[] leftdownx = new int[ALL_DOTS], leftdowny = new int[ALL_DOTS];
+    private int[] leftdownx = new int[ALL_DOTS];
+    private int[] leftdowny = new int[ALL_DOTS];
     private int[] rightupx = new int[ALL_DOTS], rightupy = new int[ALL_DOTS];
     private int[] rightdownx = new int[ALL_DOTS], rightdowny = new int[ALL_DOTS];
     private int[] upleftx = new int[ALL_DOTS], uplefty = new int[ALL_DOTS];
@@ -38,7 +40,6 @@ public class GameField extends JPanel implements ActionListener {
     private int[] downrightx = new int[ALL_DOTS], downrighty = new int[ALL_DOTS];
     private int[] verticallybodyx = new int[ALL_DOTS], verticallybodyy = new int[ALL_DOTS];
     private int[] horizontallybodyx = new int[ALL_DOTS], horizontallybodyy = new int[ALL_DOTS];
-
     private int dots;
     private Timer timer;
     private boolean left = false, last_left = false;
@@ -65,6 +66,12 @@ public class GameField extends JPanel implements ActionListener {
         }
         timer = new Timer(500, this);
         timer.start();
+        new java.util.Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                repaint();
+            }
+        },50);
         createApple();
     }
 
@@ -95,6 +102,8 @@ public class GameField extends JPanel implements ActionListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (inGame) {
+            g.setColor(Color.GREEN);
+            g.drawString("Счёт: " + (dots-2), 1, 10);
             g.drawImage(apple, appleX, appleY, this);
             if (up) {
                 g.drawImage(snake_head_up, x[0], y[0], this);
@@ -221,6 +230,7 @@ public class GameField extends JPanel implements ActionListener {
                     downrighty[i] = -1;
                 }
             }
+            //делаем здесь тоже самое что и для поворотов
             if (horizontallybodyx[i] == x[i] && horizontallybodyy[i] == y[i]) {
                 horizontallybodyx[i + 1] = horizontallybodyx[i];
                 horizontallybodyy[i + 1] = horizontallybodyy[i];
@@ -245,8 +255,8 @@ public class GameField extends JPanel implements ActionListener {
                 upleftx[1] = x[1]; // запоминаем что тут поворот сверху налево
                 uplefty[1] = y[1]; // запоминаем что тут поворот сверху налево
             }
-            horizontallybodyx[1] = x[1];
-            horizontallybodyy[1] = y[1];
+            horizontallybodyx[1] = x[1]; // запоминаем что этот сегмент стоит горизонтально
+            horizontallybodyy[1] = y[1]; // запоминаем что этот сегмент стоит горизонтально
             last_down = false; // убираем повороты чтобы каждый сегмент не был им
             last_up = false; // убираем повороты чтобы каждый сегмент не был им
             x[0] -= DOT_SIZE; // перемещаем голову влево на 1 сегмент ( -x)
@@ -260,8 +270,8 @@ public class GameField extends JPanel implements ActionListener {
                 uprightx[1] = x[1]; // запоминаем что тут поворот сверху направо
                 uprighty[1] = y[1]; // запоминаем что тут поворот сверху направо
             }
-            horizontallybodyx[1] = x[1];
-            horizontallybodyy[1] = y[1];
+            horizontallybodyx[1] = x[1]; // запоминаем что этот сегмент стоит горизонтально
+            horizontallybodyy[1] = y[1]; // запоминаем что этот сегмент стоит горизонтально
             last_down = false; // убираем повороты чтобы каждый сегмент не был им
             last_up = false; // убираем повороты чтобы каждый сегмент не был им
             x[0] += DOT_SIZE; // перемещаем голову вправо на 1 сегмент ( +x)
@@ -275,8 +285,8 @@ public class GameField extends JPanel implements ActionListener {
                 rightupx[1] = x[1]; // запоминаем что тут поворот справо вверх
                 rightupy[1] = y[1]; // запоминаем что тут поворот справо вверх
             }
-            verticallybodyx[1] = x[1];
-            verticallybodyy[1] = y[1];
+            verticallybodyx[1] = x[1]; // запоминаем что этот сегмент стоит вертикально
+            verticallybodyy[1] = y[1]; // запоминаем что этот сегмент стоит вертикально
             last_left = false; // убираем повороты чтобы каждый сегмент не был им
             last_right = false; // убираем повороты чтобы каждый сегмент не был им
             y[0] -= DOT_SIZE; // перемещаем голову вверх на 1 сегмент (-y)
@@ -290,8 +300,8 @@ public class GameField extends JPanel implements ActionListener {
                 rightdownx[1] = x[1]; // запоминаем что тут поворот справо вниз
                 rightdowny[1] = y[1]; // запоминаем что тут поворот справо вниз
             }
-            verticallybodyx[1] = x[1];
-            verticallybodyy[1] = y[1];
+            verticallybodyx[1] = x[1]; // запоминаем что этот сегмент стоит вертикально
+            verticallybodyy[1] = y[1]; // запоминаем что этот сегмент стоит вертикально
             last_left = false; // убираем повороты чтобы каждый сегмент не был им
             last_right = false; // убираем повороты чтобы каждый сегмент не был им
             y[0] += DOT_SIZE; // перемещаем голову вверх на 1 сегмент (+y)
@@ -306,23 +316,17 @@ public class GameField extends JPanel implements ActionListener {
     }
 
     public void checkCollisions() {
-        for (int i = dots; i > 0; i--) {
-            if (i > 4 && x[0] == x[i] && y[0] == y[i]) {
+        for (int i = dots; i > 0; i--)
+            if (i > 4 && x[0] == x[i] && y[0] == y[i])
                 inGame = false;
-            }
-        }
-        if (x[0] > SIZE-40) {
+        if (x[0] > SIZE-40)
             inGame = false;
-        }
-        if (x[0] < 0) {
+        if (x[0] < 0)
             inGame = false;
-        }
-        if (y[0] > SIZE-40) {
+        if (y[0] > SIZE-40)
             inGame = false;
-        }
-        if (y[0] < 0) {
+        if (y[0] < 0)
             inGame = false;
-        }
     }
 
     @Override
@@ -331,7 +335,6 @@ public class GameField extends JPanel implements ActionListener {
             checkApple();
             checkCollisions();
             move();
-
         }
         repaint();
     }
@@ -377,6 +380,10 @@ public class GameField extends JPanel implements ActionListener {
         last_right = right;
         last_down = down;
         last_up = up;
+        left = false;
+        right = false;
+        down = false;
+        up = false;
     }
 
 
