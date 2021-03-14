@@ -178,10 +178,12 @@ public class GameField extends JPanel implements ActionListener {
             }
         } else {
             String str = "Game Over";
+
             //Font f = new Font("Arial",14,Font.BOLD);
             g.setColor(Color.white);
             // g.setFont(f);
             g.drawString(str, 125, SIZE / 2);
+            g.drawString("Счёт: " + (dots-2) + " Скорость: " + speed, 100, (SIZE / 2) +20);
         }
     }
 
