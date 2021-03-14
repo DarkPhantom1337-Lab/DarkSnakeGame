@@ -42,7 +42,7 @@ public class GameField extends JPanel implements ActionListener {
     private int[] verticallybodyx = new int[ALL_DOTS], verticallybodyy = new int[ALL_DOTS];
     private int[] horizontallybodyx = new int[ALL_DOTS], horizontallybodyy = new int[ALL_DOTS];
     private java.util.List<Integer> levels = new ArrayList<Integer>();
-    private int dots;
+    private int dots,speed = 1;
     private Timer timer;
     private boolean left = false, last_left = false;
     private boolean right = true, last_right = false;
@@ -105,7 +105,7 @@ public class GameField extends JPanel implements ActionListener {
         super.paintComponent(g);
         if (inGame) {
             g.setColor(Color.GREEN);
-            g.drawString("Счёт: " + (dots-2), 1, 10);
+            g.drawString("Счёт: " + (dots-2) + " Скорость: " + speed, 1, 10);
             g.drawImage(apple, appleX, appleY, this);
             if (up) {
                 g.drawImage(snake_head_up, x[0], y[0], this);
@@ -340,7 +340,8 @@ public class GameField extends JPanel implements ActionListener {
                     checkCollisions();
                     move();
                     repaint();
-                    System.out.println("" + (dots / 5));
+                    speed = (dots / 5)+1;
+                    System.out.println("Change Snake speed, current speed: " + (dots / 5));
                     levels.add((dots-2)/5);
                     timer.setDelay(250 - ((dots + 2) / 5 * 20));
                     timer.restart();
