@@ -48,7 +48,7 @@ public class GameField extends JPanel implements ActionListener {
     private boolean right = true, last_right = false;
     private boolean up = false, last_up = false;
     private boolean down = false, last_down = false;
-    private boolean inGame = false;
+    private boolean inGame = false, inmenu = true;
 
 
     public GameField() {
@@ -103,6 +103,13 @@ public class GameField extends JPanel implements ActionListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if (inmenu){
+            g.setColor(Color.GREEN);
+            g.drawString("DarkSnakeGame", 100, (SIZE-40)/2);
+            g.drawString("Нажми Пробел чтобы начать", 70, ((SIZE-40)/2) + 20);
+            g.drawString("by DarkPhantom1337", 180, SIZE-20);
+            return;
+        }
         if (inGame) {
             g.setColor(Color.GREEN);
             g.drawString("Счёт: " + (dots-2) + " Скорость: " + speed, 1, 10);
@@ -360,7 +367,8 @@ public class GameField extends JPanel implements ActionListener {
             super.keyPressed(e);
             int key = e.getKeyCode();
             if (key == KeyEvent.VK_SPACE) {
-                inGame = !inGame;
+                inmenu = false;
+                inGame = true;
             }
             if (key == KeyEvent.VK_LEFT && !right) {
                 changeDirection();
