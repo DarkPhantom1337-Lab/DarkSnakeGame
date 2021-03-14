@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.TimerTask;
 
@@ -40,6 +41,7 @@ public class GameField extends JPanel implements ActionListener {
     private int[] downrightx = new int[ALL_DOTS], downrighty = new int[ALL_DOTS];
     private int[] verticallybodyx = new int[ALL_DOTS], verticallybodyy = new int[ALL_DOTS];
     private int[] horizontallybodyx = new int[ALL_DOTS], horizontallybodyy = new int[ALL_DOTS];
+    private java.util.List<Integer> levels = new ArrayList<Integer>();
     private int dots;
     private Timer timer;
     private boolean left = false, last_left = false;
@@ -64,7 +66,7 @@ public class GameField extends JPanel implements ActionListener {
             x[i] = dots * DOT_SIZE - i * DOT_SIZE;
             y[i] = dots * DOT_SIZE;
         }
-        timer = new Timer(500, this);
+        timer = new Timer(250, this);
         timer.start();
         new java.util.Timer().schedule(new TimerTask() {
             @Override
@@ -332,6 +334,18 @@ public class GameField extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (inGame) {
+            if ((dots+2)/5 == 1){
+                if ((dots-2)/5 != 0 && !levels.contains((dots-2)/5)) {
+                    checkApple();
+                    checkCollisions();
+                    move();
+                    repaint();
+                    System.out.println("" + (dots / 5));
+                    levels.add((dots-2)/5);
+                    timer.setDelay(250 - ((dots + 2) / 5 * 20));
+                    timer.restart();
+                }
+            }
             checkApple();
             checkCollisions();
             move();
