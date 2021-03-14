@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class GameField extends JPanel implements ActionListener {
 
@@ -25,7 +26,7 @@ public class GameField extends JPanel implements ActionListener {
     private Image snake_body_right_up, snake_body_right_down;
     private Image snake_body_left_up, snake_body_left_down;
     private Image snake_head_up, snake_head_down, snake_head_left, snake_head_right;
-    private Image apple;
+    private Image apple, minisegment;
     private int appleX;
     private int appleY;
     private int[] x = new int[ALL_DOTS];
@@ -41,8 +42,10 @@ public class GameField extends JPanel implements ActionListener {
     private int[] downrightx = new int[ALL_DOTS], downrighty = new int[ALL_DOTS];
     private int[] verticallybodyx = new int[ALL_DOTS], verticallybodyy = new int[ALL_DOTS];
     private int[] horizontallybodyx = new int[ALL_DOTS], horizontallybodyy = new int[ALL_DOTS];
+    private int[] leftbodyx = new int[ALL_DOTS], leftbodyy = new int[ALL_DOTS];
+    private int[] upbodyx = new int[ALL_DOTS], upbodyy = new int[ALL_DOTS];
     private java.util.List<Integer> levels = new ArrayList<Integer>();
-    private int dots,speed = 1;
+    private int dots, speed = 1, play_seconds = 0, play_minutes = 0;
     private Timer timer;
     private boolean left = false, last_left = false;
     private boolean right = true, last_right = false;
@@ -73,7 +76,18 @@ public class GameField extends JPanel implements ActionListener {
             public void run() {
                 repaint();
             }
-        },50);
+        }, 50, 50);
+        new java.util.Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (inGame) {
+                    if (play_seconds == 59) {
+                        play_seconds = 0;
+                        play_minutes++;
+                    } else play_seconds++;
+                }
+            }
+        }, 1, 1000);
         createApple();
     }
 
@@ -98,21 +112,22 @@ public class GameField extends JPanel implements ActionListener {
         snake_body_right_down = new ImageIcon("snake_body_right_down.png").getImage();
         snake_body_left_up = new ImageIcon("snake_body_left_up.png").getImage();
         snake_body_left_down = new ImageIcon("snake_body_left_down.png").getImage();
+        minisegment = new ImageIcon("mini-segment.png").getImage();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (inmenu){
+        if (inmenu) {
             g.setColor(Color.GREEN);
-            g.drawString("DarkSnakeGame", 100, (SIZE-40)/2);
-            g.drawString("Нажми Пробел чтобы начать", 70, ((SIZE-40)/2) + 20);
-            g.drawString("by DarkPhantom1337", 180, SIZE-20);
+            g.drawString("DarkSnakeGame", 100, (SIZE - 40) / 2);
+            g.drawString("Нажми Пробел чтобы начать", 70, ((SIZE - 40) / 2) + 20);
+            g.drawString("by DarkPhantom1337", 180, SIZE - 20);
             return;
         }
         if (inGame) {
             g.setColor(Color.GREEN);
-            g.drawString("Счёт: " + (dots-2) + " Скорость: " + speed, 1, 10);
+            g.drawString("Счёт: " + (dots - 2) + " Скорость: " + speed + " В игре: " + play_minutes + " м. " + play_seconds + " с.", 1, 10);
             g.drawImage(apple, appleX, appleY, this);
             if (up) {
                 g.drawImage(snake_head_up, x[0], y[0], this);
@@ -159,31 +174,39 @@ public class GameField extends JPanel implements ActionListener {
                     continue;
                 }
                 Boolean rightup = (rightupx[i] == x[i] && rightupy[i] == y[i]),
-                        downleft =  (downleftx[i] == x[i] && downlefty[i] == y[i]);
+                        downleft = (downleftx[i] == x[i] && downlefty[i] == y[i]);
                 if (rightup || downleft) {
                     g.drawImage(snake_body_left_up, x[i], y[i], this);
-                    if (i == dots - 2)
+                    if (i == dots - 2) {
                         if (rightup) g.drawImage(snake_tail_right, x[dots - 1], y[dots - 1], this);
                         else g.drawImage(snake_tail_down, x[dots - 1], y[dots - 1], this);
+                    }
                     continue;
                 }
                 if (horizontallybodyx[i] == x[i] && horizontallybodyy[i] == y[i]) {
-                    g.drawImage(snake_body_horizontally, x[i], y[i], this);
+                    dynamicDrawImage(g, x[i], y[i]);
+                    g.drawImage(snake_body_horizontally, x[i], y[i], GameField.this);
+                    if (leftbodyx[i] == x[i] && leftbodyy[i] == y[i])
+                        g.drawImage(snake_tail_left, x[dots - 1], y[dots - 1], GameField.this);
+                    else
+                        g.drawImage(snake_tail_right, x[dots - 1], y[dots - 1], GameField.this);
                     continue;
                 }
                 if (verticallybodyx[i] == x[i] && verticallybodyy[i] == y[i]) {
-                    g.drawImage(snake_body_vertically, x[i], y[i], this);
+                    dynamicDrawImage(g, x[i], y[i]);
+                    g.drawImage(snake_body_vertically, x[i], y[i], GameField.this);
+                    if (upbodyx[i] == x[i] && upbodyy[i] == y[i])
+                        g.drawImage(snake_tail_up, x[dots - 1], y[dots - 1], GameField.this);
+                    else
+                        g.drawImage(snake_tail_down, x[dots - 1], y[dots - 1], GameField.this);
                     continue;
                 }
             }
         } else {
             String str = "Game Over";
-
-            //Font f = new Font("Arial",14,Font.BOLD);
             g.setColor(Color.white);
-            // g.setFont(f);
             g.drawString(str, 125, SIZE / 2);
-            g.drawString("Счёт: " + (dots-2) + " Скорость: " + speed, 100, (SIZE / 2) +20);
+            g.drawString("Счёт: " + (dots - 2) + " Скорость: " + speed + " В игре: " + play_minutes + " м. " + play_seconds + " с.", 100, (SIZE / 2) + 20);
         }
     }
 
@@ -254,6 +277,18 @@ public class GameField extends JPanel implements ActionListener {
                 verticallybodyx[i] = -1;
                 verticallybodyy[i] = -1;
             }
+            if (leftbodyx[i] == x[i] && leftbodyy[i] == y[i]) {
+                leftbodyx[i + 1] = leftbodyx[i];
+                leftbodyy[i + 1] = leftbodyy[i];
+                leftbodyx[i] = -1;
+                leftbodyy[i] = -1;
+            }
+            if (upbodyx[i] == x[i] && upbodyy[i] == y[i]) {
+                upbodyx[i + 1] = upbodyx[i];
+                upbodyy[i + 1] = upbodyy[i];
+                upbodyx[i] = -1;
+                upbodyy[i] = -1;
+            }
             x[i] = x[i - 1]; // перемещаем сегмент змейки дальше по карте
             y[i] = y[i - 1]; // перемещаем сегмент змейки дальше по карте
         }
@@ -268,6 +303,8 @@ public class GameField extends JPanel implements ActionListener {
             }
             horizontallybodyx[1] = x[1]; // запоминаем что этот сегмент стоит горизонтально
             horizontallybodyy[1] = y[1]; // запоминаем что этот сегмент стоит горизонтально
+            leftbodyx[1] = x[1];
+            leftbodyy[2] = y[1];
             last_down = false; // убираем повороты чтобы каждый сегмент не был им
             last_up = false; // убираем повороты чтобы каждый сегмент не был им
             x[0] -= DOT_SIZE; // перемещаем голову влево на 1 сегмент ( -x)
@@ -298,6 +335,8 @@ public class GameField extends JPanel implements ActionListener {
             }
             verticallybodyx[1] = x[1]; // запоминаем что этот сегмент стоит вертикально
             verticallybodyy[1] = y[1]; // запоминаем что этот сегмент стоит вертикально
+            upbodyx[1] = x[1];
+            upbodyy[2] = y[1];
             last_left = false; // убираем повороты чтобы каждый сегмент не был им
             last_right = false; // убираем повороты чтобы каждый сегмент не был им
             y[0] -= DOT_SIZE; // перемещаем голову вверх на 1 сегмент (-y)
@@ -330,11 +369,11 @@ public class GameField extends JPanel implements ActionListener {
         for (int i = dots; i > 0; i--)
             if (i > 4 && x[0] == x[i] && y[0] == y[i])
                 inGame = false;
-        if (x[0] > SIZE-40)
+        if (x[0] > SIZE - 40)
             inGame = false;
         if (x[0] < 0)
             inGame = false;
-        if (y[0] > SIZE-40)
+        if (y[0] > SIZE - 40)
             inGame = false;
         if (y[0] < 0)
             inGame = false;
@@ -343,15 +382,11 @@ public class GameField extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (inGame) {
-            if ((dots+2)%5 == 0){
-                if ((dots-2)/5 != 0 && !levels.contains((dots-2)/5)) {
-                    checkApple();
-                    checkCollisions();
-                    move();
-                    repaint();
-                    speed = (dots / 5)+1;
+            if ((dots + 2) % 5 == 0) {
+                if ((dots - 2) / 5 != 0 && !levels.contains((dots - 2) / 5)) {
+                    speed = (dots / 5) + 1;
                     System.out.println("Change Snake speed, current speed: " + (dots / 5));
-                    levels.add((dots-2)/5);
+                    levels.add((dots - 2) / 5);
                     timer.setDelay(250 - ((dots + 2) / 5 * 20));
                     timer.restart();
                 }
@@ -409,6 +444,23 @@ public class GameField extends JPanel implements ActionListener {
         right = false;
         down = false;
         up = false;
+    }
+
+    private void dynamicDrawImage(Graphics g, Integer px, Integer py) {
+      /*  final Integer[] x = {px, py, 1};
+        Integer y = py;
+        new java.util.Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (x[2] == 20)
+                    this.cancel();
+                g.drawImage(minisegment, px, py, GameField.this);
+                x[0]++;
+                x[1]++;
+                x[2]++;
+            }
+        }, 1, 1);
+**/
     }
 
 
