@@ -36,6 +36,9 @@ public class GameField extends JPanel implements ActionListener {
     private int[] uprightx = new int[ALL_DOTS], uprighty = new int[ALL_DOTS];
     private int[] downleftx = new int[ALL_DOTS], downlefty = new int[ALL_DOTS];
     private int[] downrightx = new int[ALL_DOTS], downrighty = new int[ALL_DOTS];
+    private int[] verticallybodyx = new int[ALL_DOTS], verticallybodyy = new int[ALL_DOTS];
+    private int[] horizontallybodyx = new int[ALL_DOTS], horizontallybodyy = new int[ALL_DOTS];
+
     private int dots;
     private Timer timer;
     private boolean left = false, last_left = false;
@@ -110,30 +113,49 @@ public class GameField extends JPanel implements ActionListener {
                 g.drawImage(snake_head_right, x[0], y[0], this);
                 g.drawImage(snake_tail_right, x[dots - 1], y[dots - 1], this);
             }
-            Boolean changedDirection = false;
             for (int i = 1; i < dots - 1; i++) {
-                if ((leftdownx[i] == x[i] && leftdowny[i] == y[i]) || (uprightx[i] == x[i] && uprighty[i] == y[i])) {
+                Boolean leftdown = (leftdownx[i] == x[i] && leftdowny[i] == y[i]),
+                        upright = (uprightx[i] == x[i] && uprighty[i] == y[i]);
+                if (leftdown || upright) {
                     g.drawImage(snake_body_right_down, x[i], y[i], this);
+                    if (i == dots - 2)
+                        if (leftdown) g.drawImage(snake_tail_left, x[dots - 1], y[dots - 1], this);
+                        else g.drawImage(snake_tail_up, x[dots - 1], y[dots - 1], this);
                     continue;
                 }
-                if ((leftupx[i] == x[i] && leftupy[i] == y[i]) || (downrightx[i] == x[i] && downrighty[i] == y[i])) {
+                Boolean leftup = (leftupx[i] == x[i] && leftupy[i] == y[i]),
+                        downright = (downrightx[i] == x[i] && downrighty[i] == y[i]);
+                if (leftup || downright) {
                     g.drawImage(snake_body_right_up, x[i], y[i], this);
+                    if (i == dots - 2)
+                        if (leftup) g.drawImage(snake_tail_left, x[dots - 1], y[dots - 1], this);
+                        else g.drawImage(snake_tail_down, x[dots - 1], y[dots - 1], this);
                     continue;
                 }
-                if ((rightdownx[i] == x[i] && rightdowny[i] == y[i]) || (upleftx[i] == x[i] && uplefty[i] == y[i])) {
+                Boolean rightdown = (rightdownx[i] == x[i] && rightdowny[i] == y[i]),
+                        upleft = (upleftx[i] == x[i] && uplefty[i] == y[i]);
+                if (rightdown || upleft) {
                     g.drawImage(snake_body_left_down, x[i], y[i], this);
+                    if (i == dots - 2)
+                        if (rightdown) g.drawImage(snake_tail_right, x[dots - 1], y[dots - 1], this);
+                        else g.drawImage(snake_tail_up, x[dots - 1], y[dots - 1], this);
                     continue;
                 }
-                if ((rightupx[i] == x[i] && rightupy[i] == y[i]) || (downleftx[i] == x[i] && downlefty[i] == y[i])) {
+                Boolean rightup = (rightupx[i] == x[i] && rightupy[i] == y[i]),
+                        downleft =  (downleftx[i] == x[i] && downlefty[i] == y[i]);
+                if (rightup || downleft) {
                     g.drawImage(snake_body_left_up, x[i], y[i], this);
+                    if (i == dots - 2)
+                        if (rightup) g.drawImage(snake_tail_right, x[dots - 1], y[dots - 1], this);
+                        else g.drawImage(snake_tail_down, x[dots - 1], y[dots - 1], this);
                     continue;
                 }
-                if (up || down) {
-                    g.drawImage(snake_body_vertically, x[i], y[i], this);
-                    continue;
-                }
-                if (left || right) {
+                if (horizontallybodyx[i] == x[i] && horizontallybodyy[i] == y[i]) {
                     g.drawImage(snake_body_horizontally, x[i], y[i], this);
+                    continue;
+                }
+                if (verticallybodyx[i] == x[i] && verticallybodyy[i] == y[i]) {
+                    g.drawImage(snake_body_vertically, x[i], y[i], this);
                     continue;
                 }
             }
@@ -200,6 +222,18 @@ public class GameField extends JPanel implements ActionListener {
                     downrighty[i] = -1;
                 }
             }
+            if (horizontallybodyx[i] == x[i] && horizontallybodyy[i] == y[i]) {
+                horizontallybodyx[i + 1] = horizontallybodyx[i];
+                horizontallybodyy[i + 1] = horizontallybodyy[i];
+                horizontallybodyx[i] = -1;
+                horizontallybodyy[i] = -1;
+            }
+            if (verticallybodyx[i] == x[i] && verticallybodyy[i] == y[i]) {
+                verticallybodyx[i + 1] = verticallybodyx[i];
+                verticallybodyy[i + 1] = verticallybodyy[i];
+                verticallybodyx[i] = -1;
+                verticallybodyy[i] = -1;
+            }
             x[i] = x[i - 1]; // перемещаем сегмент змейки дальше по карте
             y[i] = y[i - 1]; // перемещаем сегмент змейки дальше по карте
         }
@@ -212,6 +246,8 @@ public class GameField extends JPanel implements ActionListener {
                 upleftx[1] = x[1]; // запоминаем что тут поворот сверху налево
                 uplefty[1] = y[1]; // запоминаем что тут поворот сверху налево
             }
+            horizontallybodyx[1] = x[1];
+            horizontallybodyy[1] = y[1];
             last_down = false; // убираем повороты чтобы каждый сегмент не был им
             last_up = false; // убираем повороты чтобы каждый сегмент не был им
             x[0] -= DOT_SIZE; // перемещаем голову влево на 1 сегмент ( -x)
@@ -225,6 +261,8 @@ public class GameField extends JPanel implements ActionListener {
                 uprightx[1] = x[1]; // запоминаем что тут поворот сверху направо
                 uprighty[1] = y[1]; // запоминаем что тут поворот сверху направо
             }
+            horizontallybodyx[1] = x[1];
+            horizontallybodyy[1] = y[1];
             last_down = false; // убираем повороты чтобы каждый сегмент не был им
             last_up = false; // убираем повороты чтобы каждый сегмент не был им
             x[0] += DOT_SIZE; // перемещаем голову вправо на 1 сегмент ( +x)
@@ -238,6 +276,8 @@ public class GameField extends JPanel implements ActionListener {
                 rightupx[1] = x[1]; // запоминаем что тут поворот справо вверх
                 rightupy[1] = y[1]; // запоминаем что тут поворот справо вверх
             }
+            verticallybodyx[1] = x[1];
+            verticallybodyy[1] = y[1];
             last_left = false; // убираем повороты чтобы каждый сегмент не был им
             last_right = false; // убираем повороты чтобы каждый сегмент не был им
             y[0] -= DOT_SIZE; // перемещаем голову вверх на 1 сегмент (-y)
@@ -251,6 +291,8 @@ public class GameField extends JPanel implements ActionListener {
                 rightdownx[1] = x[1]; // запоминаем что тут поворот справо вниз
                 rightdowny[1] = y[1]; // запоминаем что тут поворот справо вниз
             }
+            verticallybodyx[1] = x[1];
+            verticallybodyy[1] = y[1];
             last_left = false; // убираем повороты чтобы каждый сегмент не был им
             last_right = false; // убираем повороты чтобы каждый сегмент не был им
             y[0] += DOT_SIZE; // перемещаем голову вверх на 1 сегмент (+y)
