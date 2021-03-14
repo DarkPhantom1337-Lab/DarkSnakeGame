@@ -334,7 +334,7 @@ public class GameField extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (inGame) {
-            if ((dots+2)/5 == 1){
+            if ((dots+2)%5 == 0){
                 if ((dots-2)/5 != 0 && !levels.contains((dots-2)/5)) {
                     checkApple();
                     checkCollisions();
