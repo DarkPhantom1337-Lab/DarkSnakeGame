@@ -69,13 +69,12 @@ public class GameField extends JPanel implements ActionListener {
     }
 
     public void createApple() {
-        appleX = new Random().nextInt(16) * DOT_SIZE;
-        appleY = new Random().nextInt(16) * DOT_SIZE;
+        appleX = new Random().nextInt(15) * DOT_SIZE;
+        appleY = new Random().nextInt(15) * DOT_SIZE;
     }
 
     public void loadImages() {
-        ImageIcon iia = new ImageIcon("apple.png");
-        apple = iia.getImage();
+        apple = new ImageIcon("apple.png").getImage();
         snake_body_vertically = new ImageIcon("snake_body_vertically.png").getImage();
         snake_body_horizontally = new ImageIcon("snake_body_horizontally.png").getImage();
         snake_head_up = new ImageIcon("snake_head_up.png").getImage();
@@ -312,13 +311,13 @@ public class GameField extends JPanel implements ActionListener {
                 inGame = false;
             }
         }
-        if (x[0] > SIZE) {
+        if (x[0] > SIZE-40) {
             inGame = false;
         }
         if (x[0] < 0) {
             inGame = false;
         }
-        if (y[0] > SIZE) {
+        if (y[0] > SIZE-40) {
             inGame = false;
         }
         if (y[0] < 0) {
